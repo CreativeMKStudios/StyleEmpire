@@ -1,0 +1,77 @@
+---
+import "../styles/global.css";
+import "@fontsource/bebas-neue/latin-400.css";
+import "@fontsource/manrope/latin-400.css";
+import "@fontsource/manrope/latin-600.css";
+import "@fontsource/manrope/latin-700.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import exterior from "../assets/exterior.jpg";
+import interior from "../assets/interior.jpg";
+import door from "../assets/door.jpg";
+import sunbed from "../assets/sunbed.jpg";
+import { salon } from "../data/salon.ts";
+import { breadcrumbJsonLd, faqJsonLd, salonJsonLd } from "../lib/schema.ts";
+
+interface Crumb { name: string; path: string }
+interface Faq { q: string; a: string }
+
+interface Props {
+  title: string;
+  description: string;
+  crumbs?: Crumb[];
+  faq?: readonly Faq[];
+}
+
+const { title, description, crumbs = [], faq = [] } = Astro.props;
+const site = Astro.site ?? new URL(Astro.url.origin);
+const canonical = new URL(Astro.url.pathname, site).href;
+const image = new URL(exterior.src, site).href;
+const images = [exterior, interior, door, sunbed].map((img) => new URL(img.src, site).href);
+const business = salonJsonLd(site.href, images);
+const crumbsLd = crumbs.length ? breadcrumbJsonLd(site.href, crumbs) : null;
+const faqLd = faq.length ? faqJsonLd([...faq]) : null;
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <meta name="theme-color" content="#070707" />
+    <meta name="geo.region" content="GB-NTH" />
+    <meta name="geo.placename" content="Kettering" />
+    <meta name="geo.position" content={`${salon.lat};${salon.lng}`} />
+    <meta name="ICBM" content={`${salon.lat}, ${salon.lng}`} />
+    <meta property="og:type" content="business.business" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={image} />
+    <meta property="og:locale" content="en_GB" />
+    <meta property="business:contact_data:street_address" content={salon.street} />
+    <meta property="business:contact_data:locality" content={salon.locality} />
+    <meta property="business:contact_data:postal_code" content={salon.postcode} />
+    <meta property="business:contact_data:country_name" content="United Kingdom" />
+    <meta property="business:contact_data:phone_number" content={salon.phoneTel} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={image} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <script type="application/ld+json" set:html={JSON.stringify(business)} />
+    {crumbsLd && <script type="application/ld+json" set:html={JSON.stringify(crumbsLd)} />}
+    {faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />}
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

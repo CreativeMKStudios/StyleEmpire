@@ -1,0 +1,19 @@
+---
+import Base from "../layouts/Base.astro";
+import { copy } from "../data/copy.ts";
+
+const crumbs = [
+  { name: "Home", path: "/" },
+  { name: "Privacy", path: "/privacy" },
+];
+---
+
+<Base title={copy.meta.privacyTitle} description={copy.meta.privacyDescription} crumbs={crumbs}>
+  <section class="section">
+    <div class="wrap prose" style="max-width: 44rem;">
+      <p class="crumbs"><a href="/">Home</a> / Privacy</p>
+      <h1 class="about-title">{copy.privacy.title}</h1>
+      {copy.privacy.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+    </div>
+  </section>
+</Base>

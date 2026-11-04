@@ -1,0 +1,64 @@
+---
+export const prerender = false;
+
+import Base from "../../../layouts/Base.astro";
+import { copy } from "../../../data/copy.ts";
+import { fullAddress, salon } from "../../../data/salon.ts";
+import { getBooking, markBookingPaid, paymentMode } from "../../../lib/bookings.ts";
+import { stripeSessionPaid } from "../../../lib/pay.ts";
+import { formatAppointment } from "../../../lib/time.ts";
+
+const { id = "" } = Astro.params;
+let booking = id ? getBooking(id) : null;
+const sessionId = Astro.url.searchParams.get("session_id");
+const cancelled = Astro.url.searchParams.get("cancelled") === "1";
+const error = Astro.url.searchParams.get("error");
+const mode = paymentMode();
+
+if (booking && sessionId && booking.paymentChoice === "online") {
+  const paid = await stripeSessionPaid(sessionId, booking.id);
+  if (paid) {
+    const result = await markBookingPaid(booking.id, "stripe", sessionId);
+    if (result.ok) booking = result.booking;
+  }
+}
+---
+
+<Base title="Pay | Style Empire" description="Finish payment for a Style Empire appointment.">
+  <section class="section">
+    <div class="wrap" style="max-width: 44rem;">
+      <p class="kicker">Payment</p>
+      <h1 class="about-title">Pay for your appointment</h1>
+      {!booking && <p class="error">{copy.errors.missing}</p>}
+      {cancelled && <p class="error">Card payment was cancelled. You can try again, or pay in the salon.</p>}
+      {error && <p class="error" role="alert">{error}</p>}
+      {booking && (
+        <div class="panel">
+          <p><strong>{booking.serviceName}</strong></p>
+          <p>{formatAppointment(booking.startMs)}</p>
+          <p>{salon.name}, {fullAddress}</p>
+          <p>{booking.customerName}</p>
+          {booking.status === "confirmed" && booking.paymentStatus === "paid" && <p class="ok">{copy.confirmed.paid}</p>}
+          {booking.status === "confirmed" && booking.paymentStatus === "demo_paid" && <p class="ok">{copy.confirmed.demo}</p>}
+          {booking.status === "confirmed" && booking.paymentStatus === "pay_in_store" && <p>{copy.confirmed.inStore}</p>}
+          {booking.status === "pending_payment" && mode === "demo" && (
+            <form method="post" action="/api/pay">
+              <p>{copy.book.demo}</p>
+              <input type="hidden" name="id" value={booking.id} />
+              <button class="btn" type="submit">Confirm test payment</button>
+            </form>
+          )}
+          {booking.status === "pending_payment" && mode === "stripe" && (
+            <form method="post" action="/api/pay">
+              <p>You will go to Stripe to pay by card. We do not see or store the card number.</p>
+              <input type="hidden" name="id" value={booking.id} />
+              <button class="btn" type="submit">Pay by card</button>
+            </form>
+          )}
+          {booking.status === "pending_payment" && mode === "off" && <p>{copy.book.stripeOff}</p>}
+          {booking.status === "confirmed" && <p><a href={`/book/confirmed?ref=${booking.id}`}>View the booking</a></p>}
+        </div>
+      )}
+    </div>
+  </section>
+</Base>

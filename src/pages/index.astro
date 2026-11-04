@@ -1,0 +1,172 @@
+---
+import { Image } from "astro:assets";
+import Base from "../layouts/Base.astro";
+import interior from "../assets/interior.jpg";
+import exterior from "../assets/exterior.jpg";
+import door from "../assets/door.jpg";
+import { copy } from "../data/copy.ts";
+import { salon } from "../data/salon.ts";
+import { reviews } from "../data/reviews.ts";
+import { hoursForHumans } from "../lib/schema.ts";
+
+const groups = [
+  { id: "hair", title: "Hair", text: "Cuts, blow-dries and colour. Colour is booked by phone.", href: "/services#hair" },
+  { id: "barbers", title: "Barbers", text: "A separate barber room for cuts and skin fades.", href: "/book?service=barber-cut" },
+  { id: "nails", title: "Nails", text: "Nail appointments with a nail technician.", href: "/book?service=nails" },
+  { id: "beauty", title: "Beauty", text: "Brows, lashes, makeup and aesthetics.", href: "/services#beauty" },
+  { id: "tanning", title: "Tanning", text: "Sunbeds for adults aged 18 and over.", href: "/services#tanning" },
+  { id: "book", title: "Book", text: "Pick a time online. Pay here, or pay by card when it is on.", href: "/book" },
+];
+const hours = hoursForHumans();
+---
+
+<Base title={copy.meta.homeTitle} description={copy.meta.homeDescription} faq={copy.home.faq}>
+  <section class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">{copy.home.eyebrow}</p>
+      <h1>
+        <span>Style</span>
+        <span class="h1-row">
+          <Image class="h1-inset" src={door} alt="Black front door of Style Empire, with the crown logo on the glass." widths={[92, 184]} sizes="92px" />
+          <span>Empire</span>
+        </span>
+      </h1>
+      <p class="hero-lead">{copy.home.lead}</p>
+      <p class="hero-support">{copy.home.support}</p>
+      <div class="hero-actions">
+        <a class="btn" href="/book">Book appointment</a>
+        <a class="btn btn-dark" href={`tel:${salon.phoneTel}`}>Call {salon.phoneDisplay}</a>
+      </div>
+    </div>
+    <div class="hero-photo">
+      <Image src={interior} alt="Barber chairs, a brick wall and a wood floor inside Style Empire." widths={[480, 720, 960]} sizes="(max-width: 900px) 100vw, 48vw" loading="eager" />
+      <p class="hero-caption">Barber room. Photo from the Google profile.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap about-grid">
+      <div>
+        <p class="kicker">{copy.home.aboutKicker}</p>
+        <h2 class="about-title">{copy.home.aboutTitle}</h2>
+        <div class="prose">
+          {copy.home.aboutBody.map((paragraph) => <p>{paragraph}</p>)}
+        </div>
+        <div class="photo-pair">
+          <figure>
+            <Image src={exterior} alt="Brick corner building with a Style Empire sign over the windows." widths={[400, 800, 1200]} sizes="(max-width: 900px) 100vw, 30vw" />
+            <figcaption>193 St Peter's Avenue.</figcaption>
+          </figure>
+          <figure>
+            <Image src={door} alt="Front door with an older opening-hours sign and two pot plants." widths={[400, 700]} sizes="(max-width: 900px) 100vw, 30vw" />
+            <figcaption>The hours on this door are old. Use the times below.</figcaption>
+          </figure>
+        </div>
+      </div>
+      <aside class="why">
+        <h3>{copy.home.whyTitle}</h3>
+        <ul>
+          {copy.home.why.map((item) => <li>{item}</li>)}
+        </ul>
+        <p><a class="btn btn-line" href="/about">About the salon</a></p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top: 0;">
+    <div class="wrap">
+      <p class="kicker">{copy.home.servicesKicker}</p>
+      <h2>{copy.home.servicesTitle}</h2>
+      <p>{copy.home.servicesIntro}</p>
+      <div class="cards">
+        {groups.map((group, index) => (
+          <a class:list={["card", index === 1 && "card-dark"]} href={group.href}>
+            <span class="index">0{index + 1}</span>
+            <h3>{group.title}</h3>
+            <p>{group.text}</p>
+            <span class="more">See more</span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top: 0;">
+    <div class="wrap">
+      <p class="kicker">{copy.home.reviewKicker}</p>
+      <h2>{copy.home.reviewTitle}</h2>
+      <p>{copy.home.reviewIntro}</p>
+      <div class="reviews">
+        {reviews.map((review) => (
+          <blockquote class="review">
+            <header>
+              <strong>{review.author}</strong>
+              <span class="stars" aria-label={`${review.stars} out of 5`}>{"★".repeat(review.stars)}{"☆".repeat(5 - review.stars)}</span>
+            </header>
+            <p>{review.text}</p>
+            <footer>
+              {review.when} on Google.
+              {review.shortened ? " The quote was cut short on Google." : ""}
+            </footer>
+          </blockquote>
+        ))}
+      </div>
+      <p><a href={salon.mapsUrl}>Read all {salon.reviewCount} reviews on Google</a></p>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top: 0;">
+    <div class="wrap visit-grid">
+      <div>
+        <p class="kicker">{copy.home.visitKicker}</p>
+        <h2>{copy.home.visitTitle}</h2>
+        <p>{copy.home.visitBody}</p>
+        <table class="hours">
+          <caption class="sr-only">Opening hours</caption>
+          <tbody>
+            {hours.map((row) => (
+              <tr>
+                <th scope="row">{row.day}</th>
+                <td>{row.label}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="note">{copy.contact.monday}</p>
+        <p class="note">{copy.contact.door}</p>
+      </div>
+      <iframe
+        class="map"
+        title="Map of Style Empire at 193 St Peter's Avenue, Kettering"
+        loading="lazy"
+        referrerpolicy="no-referrer-when-downgrade"
+        src={`https://maps.google.com/maps?q=${salon.lat},${salon.lng}&z=16&hl=en&output=embed`}
+      ></iframe>
+    </div>
+  </section>
+
+  <section class="section faq" style="padding-top: 0;">
+    <div class="wrap">
+      <h2>Questions</h2>
+      {copy.home.faq.map((item) => (
+        <details>
+          <summary>{item.q}</summary>
+          <p>{item.a}</p>
+        </details>
+      ))}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+  }
+</style>
