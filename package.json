@@ -1,0 +1,28 @@
+{
+  "name": "style-empire",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "dev": "NODE_OPTIONS='--experimental-sqlite' astro dev --host 0.0.0.0 --port 4321",
+    "build": "NODE_OPTIONS='--experimental-sqlite' astro build",
+    "preview": "NODE_OPTIONS='--experimental-sqlite' astro preview --host 0.0.0.0 --port 4321",
+    "check": "NODE_OPTIONS='--experimental-sqlite' astro check",
+    "test": "NODE_OPTIONS='--experimental-sqlite --experimental-strip-types' node --test tests/*.test.ts"
+  },
+  "dependencies": {
+    "@astrojs/node": "^11.1.9",
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource/bebas-neue": "^5.3.0",
+    "@fontsource/manrope": "^5.3.0",
+    "astro": "^7.4.5",
+    "nodemailer": "^10.3.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "typescript": "^6.0.3"
+  }
+}

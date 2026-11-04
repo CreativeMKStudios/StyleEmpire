@@ -1,0 +1,74 @@
+---
+export const prerender = false;
+
+import Base from "../layouts/Base.astro";
+import { copy } from "../data/copy.ts";
+import { fullAddress, salon } from "../data/salon.ts";
+import { hoursForHumans } from "../lib/schema.ts";
+
+const crumbs = [
+  { name: "Home", path: "/" },
+  { name: "Contact", path: "/contact" },
+];
+const sent = Astro.url.searchParams.get("sent") === "1";
+const error = Astro.url.searchParams.get("error");
+const hours = hoursForHumans();
+---
+
+<Base title={copy.meta.contactTitle} description={copy.meta.contactDescription} crumbs={crumbs}>
+  <section class="section">
+    <div class="wrap contact-grid">
+      <div>
+        <p class="crumbs"><a href="/">Home</a> / Contact</p>
+        <p class="kicker">{copy.contact.kicker}</p>
+        <h1 class="about-title">{copy.contact.title}</h1>
+        <p>{copy.contact.intro}</p>
+        <p>
+          <strong>{salon.name}</strong><br />
+          {fullAddress}<br />
+          {salon.region}, {salon.country}
+        </p>
+        <p><a href={`tel:${salon.phoneTel}`}>{salon.phoneDisplay}</a></p>
+        <p><a href={salon.facebook}>Facebook</a> · <a href={salon.mapsUrl}>Google Maps</a></p>
+        <table class="hours">
+          <tbody>
+            {hours.map((row) => (
+              <tr>
+                <th scope="row">{row.day}</th>
+                <td>{row.label}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <p class="note">{copy.contact.monday}</p>
+        <p class="note">{copy.contact.door}</p>
+        <iframe
+          class="map"
+          title="Map of Style Empire in Kettering"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"
+          src={`https://maps.google.com/maps?q=${salon.lat},${salon.lng}&z=16&hl=en&output=embed`}
+        ></iframe>
+      </div>
+      <form class="panel" method="post" action="/api/contact">
+        <h2 style="font-size: 3rem;">{copy.contact.formTitle}</h2>
+        <p>{copy.contact.formHelp}</p>
+        {sent && <p class="ok" role="status">Sent. Check your email for a copy, and the salon has one too.</p>}
+        {error && <p class="error" role="alert">{error}</p>}
+        <label for="name">Name</label>
+        <input id="name" name="name" autocomplete="name" required />
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" autocomplete="email" required />
+        <label for="phone">Phone, if you want a call back</label>
+        <input id="phone" name="phone" type="tel" autocomplete="tel" />
+        <label for="message">Message</label>
+        <textarea id="message" name="message" rows="6" required maxlength="1000"></textarea>
+        <div class="hp" aria-hidden="true">
+          <label for="company_website">Leave this empty</label>
+          <input id="company_website" name="company_website" tabindex="-1" autocomplete="off" />
+        </div>
+        <p><button class="btn" type="submit">Send</button></p>
+      </form>
+    </div>
+  </section>
+</Base>

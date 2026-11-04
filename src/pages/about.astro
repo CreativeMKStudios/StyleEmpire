@@ -1,0 +1,51 @@
+---
+import { Image } from "astro:assets";
+import Base from "../layouts/Base.astro";
+import interior from "../assets/interior.jpg";
+import exterior from "../assets/exterior.jpg";
+import sunbed from "../assets/sunbed.jpg";
+import logo from "../assets/logo-mark.jpg";
+import { copy } from "../data/copy.ts";
+import { salon } from "../data/salon.ts";
+
+const crumbs = [
+  { name: "Home", path: "/" },
+  { name: "About us", path: "/about" },
+];
+---
+
+<Base title={copy.meta.aboutTitle} description={copy.meta.aboutDescription} crumbs={crumbs}>
+  <section class="section">
+    <div class="wrap">
+      <p class="crumbs"><a href="/">Home</a> / About us</p>
+      <p class="kicker">{copy.about.kicker}</p>
+      <h1 class="about-title">{copy.about.title}</h1>
+      <div class="split" style="margin-top: 1.5rem;">
+        <div class="prose">
+          {copy.about.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+          <p><a class="btn" href="/book">Book a time</a></p>
+        </div>
+        <div>
+          <figure class="frame">
+            <Image src={interior} alt="Two black barber chairs against a brick wall." widths={[480, 720]} sizes="(max-width: 900px) 100vw, 40vw" />
+            <figcaption>The barber room, from the Google profile.</figcaption>
+          </figure>
+          <figure class="frame" style="margin-top: 1rem;">
+            <Image src={sunbed} alt="An orange stand-up sunbed with a curve of warm lights." widths={[480, 800]} sizes="(max-width: 900px) 100vw, 40vw" />
+            <figcaption>The sunbed. Adults aged 18 and over only.</figcaption>
+          </figure>
+        </div>
+      </div>
+      <div class="photo-pair" style="margin-top: 1.5rem;">
+        <figure>
+          <Image src={exterior} alt="The corner of the salon, with the Style Empire canopy." widths={[600, 1000]} sizes="(max-width: 900px) 100vw, 45vw" />
+          <figcaption>{salon.street}, {salon.locality}.</figcaption>
+        </figure>
+        <figure>
+          <Image src={logo} alt="Style Empire crown logo, with the line Hair, Barbers, Nails, Beauty, Tanning." widths={[400, 675]} sizes="(max-width: 900px) 100vw, 40vw" />
+          <figcaption>The logo from the Google profile.</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+</Base>

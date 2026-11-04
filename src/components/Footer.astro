@@ -1,0 +1,43 @@
+---
+import { fullAddress, salon, weekHours, hoursLabel } from "../data/salon.ts";
+const year = new Date().getFullYear();
+---
+
+<footer class="site-footer">
+  <div class="wrap-wide">
+    <div class="footer-grid">
+      <div>
+        <h2>Visit</h2>
+        <p>{salon.name}<br />{fullAddress}<br />{salon.region}</p>
+        <p><a href={`tel:${salon.phoneTel}`}>{salon.phoneDisplay}</a></p>
+        <p><a href={salon.mapsUrl}>Open in Google Maps</a></p>
+      </div>
+      <div>
+        <h2>Hours</h2>
+        <ul>
+          {weekHours.map((day) => <li>{day.day}: {hoursLabel(day)}</li>)}
+        </ul>
+      </div>
+      <div>
+        <h2>Pages</h2>
+        <ul>
+          <li><a href="/">Home</a></li>
+          <li><a href="/about">About us</a></li>
+          <li><a href="/services">Services</a></li>
+          <li><a href="/contact">Contact</a></li>
+          <li><a href="/book">Book</a></li>
+          <li><a href="/privacy">Privacy</a></li>
+        </ul>
+      </div>
+      <div>
+        <h2>Elsewhere</h2>
+        <ul>
+          <li><a href={salon.facebook}>Facebook</a></li>
+          <li><a href={salon.companiesHouse}>Companies House {salon.companyNumber}</a></li>
+        </ul>
+      </div>
+    </div>
+    <p class="wordmark">Style Empire</p>
+    <p class="legal">© {year} {salon.legalName}. Company {salon.companyNumber}. Registered office: {fullAddress}.</p>
+  </div>
+</footer>

@@ -1,0 +1,112 @@
+---
+export const prerender = false;
+
+import Base from "../layouts/Base.astro";
+import { copy } from "../data/copy.ts";
+import { salon } from "../data/salon.ts";
+import { getService, services } from "../data/services.ts";
+import { activeBusy, paymentMode } from "../lib/bookings.ts";
+import { slotsForDay } from "../lib/slots.ts";
+import { addDays, londonParts, openingWindow } from "../lib/time.ts";
+
+const now = new Date();
+const today = londonParts(now).ymd;
+const last = addDays(today, salon.horizonDays);
+const requested = Astro.url.searchParams.get("service") || "womens-cut";
+const service = getService(requested) ?? services.find((item) => item.bookable);
+const dateParam = Astro.url.searchParams.get("date") || today;
+const date = /^\d{4}-\d{2}-\d{2}$/.test(dateParam) ? dateParam : today;
+const error = Astro.url.searchParams.get("error");
+const mode = paymentMode();
+const minutes = service?.minutes ?? null;
+const slots =
+  service?.bookable && minutes
+    ? slotsForDay({ ymd: date, durationMin: minutes, now, busy: activeBusy(now) })
+    : [];
+const closed = openingWindow(date) == null;
+const onlineOk = mode === "demo" || (mode === "stripe" && service?.pricePence != null);
+
+const crumbs = [
+  { name: "Home", path: "/" },
+  { name: "Book", path: "/book" },
+];
+---
+
+<Base title={copy.meta.bookTitle} description={copy.meta.bookDescription} crumbs={crumbs}>
+  <section class="section">
+    <div class="wrap book-layout">
+      <div>
+        <p class="crumbs"><a href="/">Home</a> / Book</p>
+        <p class="kicker">{copy.book.kicker}</p>
+        <h1 class="about-title">{copy.book.title}</h1>
+        <p>{copy.book.intro}</p>
+        <p>{copy.book.price}</p>
+        <p class="note">{copy.book.monday}</p>
+        {mode === "demo" && <p class="note">{copy.book.demo}</p>}
+        {!onlineOk && <p class="note">{copy.book.stripeOff}</p>}
+        {mode === "demo" && <p>{copy.book.hold}</p>}
+      </div>
+
+      <div class="panel">
+        {error && <p class="error" role="alert">{error}</p>}
+        {!service && <p>No services are set up.</p>}
+        {service && (
+          <form method="get" action="/book">
+            <label for="service">Service</label>
+            <select id="service" name="service" onchange="this.form.requestSubmit()">
+              {services.map((item) => (
+                <option value={item.id} selected={item.id === service.id}>{item.name}</option>
+              ))}
+            </select>
+            <label for="date">Date</label>
+            <input id="date" type="date" name="date" required min={today} max={last} value={date} onchange="this.form.requestSubmit()" />
+            <p><button class="btn btn-line" type="submit">Show times</button></p>
+          </form>
+        )}
+
+        {service && !service.bookable && <p class="note">{copy.book.phoneOnly} <a href={`tel:${salon.phoneTel}`}>{salon.phoneDisplay}</a></p>}
+        {service?.bookable && closed && <p class="note">{copy.book.closed}</p>}
+        {service?.bookable && !closed && slots.length === 0 && <p class="note">{copy.book.none}</p>}
+
+        {service?.bookable && slots.length > 0 && (
+          <form method="post" action="/api/book">
+            <input type="hidden" name="service" value={service.id} />
+            <input type="hidden" name="date" value={date} />
+            <fieldset style="border: 0; padding: 0; margin: 0.6rem 0;">
+              <legend style="font-weight: 700;">Time</legend>
+              <div class="times">
+                {slots.map((slot) => (
+                  <label>
+                    <input type="radio" name="time" value={slot} required />
+                    <span>{slot}</span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
+            <label for="book-name">Name</label>
+            <input id="book-name" name="name" autocomplete="name" required />
+            <label for="book-email">Email</label>
+            <input id="book-email" name="email" type="email" autocomplete="email" required />
+            <label for="book-phone">Phone</label>
+            <input id="book-phone" name="phone" type="tel" autocomplete="tel" required />
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" rows="3" maxlength="500"></textarea>
+            <fieldset class="pay-options" style="border: 0; padding: 0;">
+              <legend style="font-weight: 700;">How will you pay?</legend>
+              <label><input type="radio" name="payment" value="in_store" checked required /> Pay in the salon, on the day</label>
+              <label>
+                <input type="radio" name="payment" value="online" required disabled={!onlineOk} />
+                Pay online {mode === "demo" ? "(test mode, no card charge)" : ""}
+              </label>
+            </fieldset>
+            <div class="hp" aria-hidden="true">
+              <label for="company_website">Leave this empty</label>
+              <input id="company_website" name="company_website" tabindex="-1" autocomplete="off" />
+            </div>
+            <p><button class="btn" type="submit">Confirm booking</button></p>
+          </form>
+        )}
+      </div>
+    </div>
+  </section>
+</Base>

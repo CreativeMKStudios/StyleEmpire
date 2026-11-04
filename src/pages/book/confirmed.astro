@@ -1,0 +1,45 @@
+---
+export const prerender = false;
+
+import Base from "../../layouts/Base.astro";
+import { copy } from "../../data/copy.ts";
+import { fullAddress, salon } from "../../data/salon.ts";
+import { getBooking } from "../../lib/bookings.ts";
+import { formatAppointment } from "../../lib/time.ts";
+
+const ref = Astro.url.searchParams.get("ref") || "";
+const booking = ref && ref !== "received" ? getBooking(ref) : null;
+const message = !booking
+  ? ref === "received"
+    ? copy.errors.honeypot
+    : copy.errors.missing
+  : booking.paymentStatus === "demo_paid"
+    ? copy.confirmed.demo
+    : booking.paymentStatus === "paid"
+      ? copy.confirmed.paid
+      : booking.paymentStatus === "pending"
+        ? copy.confirmed.pending
+        : copy.confirmed.inStore;
+---
+
+<Base title="Booking | Style Empire" description="Your Style Empire appointment.">
+  <section class="section">
+    <div class="wrap" style="max-width: 44rem;">
+      <p class="kicker">Booking</p>
+      <h1 class="about-title">{booking ? "You are in the book." : "Booking"}</h1>
+      <p class={booking ? "ok" : "error"} role="status">{message}</p>
+      {booking && (
+        <div class="panel">
+          <p><strong>{booking.serviceName}</strong></p>
+          <p>{formatAppointment(booking.startMs)}</p>
+          <p>{salon.name}<br />{fullAddress}</p>
+          <p>{booking.customerName}<br />{booking.customerEmail}<br />{booking.customerPhone}</p>
+          {booking.notes && <p>Note: {booking.notes}</p>}
+          <p>Reference: {booking.id}</p>
+          {booking.status === "pending_payment" && <p><a class="btn" href={`/book/pay/${booking.id}`}>Finish payment</a></p>}
+        </div>
+      )}
+      <p><a href="/">Back home</a> · <a href={`tel:${salon.phoneTel}`}>Call {salon.phoneDisplay}</a></p>
+    </div>
+  </section>
+</Base>

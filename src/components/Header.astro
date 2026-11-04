@@ -1,0 +1,43 @@
+---
+import { salon } from "../data/salon.ts";
+
+const path = Astro.url.pathname;
+const links = [
+  { href: "/", label: "Home" },
+  { href: "/about", label: "About" },
+  { href: "/services", label: "Services" },
+  { href: "/contact", label: "Contact" },
+];
+---
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="/" aria-label="Style Empire home">
+      <svg viewBox="0 0 80 48" aria-hidden="true">
+        <path fill="currentColor" d="M6 40h68v6H6zM10 38 22 16l12 12L40 6l6 22 12-12 12 22z" />
+        <path fill="currentColor" d="m24 12 3 3-3 3-3-3zm16-8 3 3-3 3-3-3zm16 8 3 3-3 3-3-3z" />
+      </svg>
+      <span>
+        <span class="brand-name">Style Empire</span>
+        <small>Kettering</small>
+      </span>
+    </a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="site-nav">Menu</button>
+    <nav id="site-nav" class="site-nav" aria-label="Main">
+      {links.map((link) => (
+        <a href={link.href} aria-current={path === link.href ? "page" : undefined}>{link.label}</a>
+      ))}
+      <a class="header-phone" href={`tel:${salon.phoneTel}`}>{salon.phoneDisplay}</a>
+      <a class="btn" href="/book">Book your slot</a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const button = document.querySelector(".nav-toggle");
+  const nav = document.querySelector("#site-nav");
+  button?.addEventListener("click", () => {
+    const open = nav?.classList.toggle("is-open");
+    button.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+</script>

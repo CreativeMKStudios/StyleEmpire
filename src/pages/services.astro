@@ -1,0 +1,44 @@
+---
+import Base from "../layouts/Base.astro";
+import { copy } from "../data/copy.ts";
+import { salon } from "../data/salon.ts";
+import { services } from "../data/services.ts";
+
+const crumbs = [
+  { name: "Home", path: "/" },
+  { name: "Services", path: "/services" },
+];
+const groups = [...new Set(services.map((service) => service.group))];
+---
+
+<Base title={copy.meta.servicesTitle} description={copy.meta.servicesDescription} crumbs={crumbs}>
+  <section class="section">
+    <div class="wrap">
+      <p class="crumbs"><a href="/">Home</a> / Services</p>
+      <p class="kicker">{copy.services.kicker}</p>
+      <h1 class="about-title">{copy.services.title}</h1>
+      <div class="prose" style="max-width: 42rem; margin-top: 1rem;">
+        {copy.services.intro.map((paragraph) => <p>{paragraph}</p>)}
+      </div>
+      {groups.map((group) => (
+        <section id={group.toLowerCase()} style="margin-top: 2rem;">
+          <h2 style="font-size: 3rem;">{group}</h2>
+          {services.filter((service) => service.group === group).map((service) => (
+            <article class="service-block" id={service.id}>
+              <p class="muted">{service.minutes ? `${service.minutes} min held` : "Call to book"}</p>
+              <div>
+                <h3 style="font-family: var(--serif); font-size: 1.35rem; letter-spacing: 0; line-height: 1.3; font-weight: 700;">{service.name}</h3>
+                <p>{service.summary}</p>
+              </div>
+              {service.bookable ? (
+                <a class="btn" href={`/book?service=${service.id}`}>Book</a>
+              ) : (
+                <a class="btn btn-line" href={`tel:${salon.phoneTel}`}>Call</a>
+              )}
+            </article>
+          ))}
+        </section>
+      ))}
+    </div>
+  </section>
+</Base>
